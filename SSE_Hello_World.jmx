@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.1.1 r1855137">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Plan for SSE Protocol Simulation" enabled="true">
+      <stringProp name="TestPlan.comments"></stringProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+      <boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp>
+      <boolProp name="TestPlan.serialize_threadgroups">false</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="Path" elementType="Argument">
+            <stringProp name="Argument.name">Path</stringProp>
+            <stringProp name="Argument.value">${__BeanShell(import org.apache.jmeter.services.FileServer; FileServer.getFileServer().getBaseDir();)}${__BeanShell(File.separator,)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+        </collectionProp>
+      </elementProp>
+      <stringProp name="TestPlan.user_define_classpath"></stringProp>
+    </TestPlan>
+    <hashTree>
+      <ConfigTestElement guiclass="HttpDefaultsGui" testclass="ConfigTestElement" testname="HTTP Request Defaults" enabled="true">
+        <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
+          <collectionProp name="Arguments.arguments"/>
+        </elementProp>
+        <stringProp name="HTTPSampler.domain"></stringProp>
+        <stringProp name="HTTPSampler.port"></stringProp>
+        <stringProp name="HTTPSampler.protocol"></stringProp>
+        <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+        <stringProp name="HTTPSampler.path"></stringProp>
+        <stringProp name="HTTPSampler.concurrentPool">6</stringProp>
+        <stringProp name="HTTPSampler.connect_timeout">60000</stringProp>
+        <stringProp name="HTTPSampler.response_timeout"></stringProp>
+      </ConfigTestElement>
+      <hashTree/>
+      <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="Global Parameters" enabled="true">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="URL" elementType="Argument">
+            <stringProp name="Argument.name">URL</stringProp>
+            <stringProp name="Argument.value">${__P(URL,1)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="eventsToTrack" elementType="Argument">
+            <stringProp name="Argument.name">eventsToTrack</stringProp>
+            <stringProp name="Argument.value">${__P(eventsToTrack,10)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+        </collectionProp>
+      </Arguments>
+      <hashTree/>
+      <CookieManager guiclass="CookiePanel" testclass="CookieManager" testname="HTTP Cookie Manager" enabled="true">
+        <collectionProp name="CookieManager.cookies"/>
+        <boolProp name="CookieManager.clearEachIteration">true</boolProp>
+      </CookieManager>
+      <hashTree/>
+      <CacheManager guiclass="CacheManagerGui" testclass="CacheManager" testname="HTTP Cache Manager" enabled="true">
+        <boolProp name="clearEachIteration">true</boolProp>
+        <boolProp name="useExpires">true</boolProp>
+        <boolProp name="CacheManager.controlledByThread">false</boolProp>
+      </CacheManager>
+      <hashTree/>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="SSE_CHATBOT_STREAMING" enabled="true">
+        <stringProp name="ThreadGroup.num_threads">${__P(gpt_dwp_knw_search_num_of_users,1)}</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">${__P(gpt_dwp_knw_search_ramp_up_period,30)}</stringProp>
+        <stringProp name="ThreadGroup.duration">${__P(Test_duration,300)}</stringProp>
+        <stringProp name="ThreadGroup.delay">${__P(gpt_dwp_knw_search_start_up_delay,1)}</stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <stringProp name="LoopController.loops">${__P(gpt_dwp_knw_search_loop_count,1)}</stringProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="TC01_SSE_STREAMING_CHAT" enabled="true">
+          <boolProp name="TransactionController.includeTimers">false</boolProp>
+          <boolProp name="TransactionController.parent">true</boolProp>
+        </TransactionController>
+        <hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="SSE Request" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+            <stringProp name="script">import okhttp3.*     // make sure okhttp-3.10.0.jar file present in dir &quot;jmeter\lib&quot;  , if not download and copy it. 
+import okhttp3.sse.* // jar file needs to be copied  under  “jmeter\lib\ext”  https://repo1.maven.org/maven2/com/squareup/okhttp3/okhttp-sse/3.11.0/okhttp-sse-3.11.0.jar
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.atomic.AtomicInteger
+
+/* 
+  Boiler Template
+  ============================================================================
+ 	SSE (Server-Sent Events) Performance Testing Script for JMeter
+  ============================================================================
+ * 
+ PURPOSE:
+    Measures user-perceived performance of streaming chatbot/AI responses.
+    Captures Time to First Token (TTFT) and First N Events timing - metrics   that matter to end users, not just total response time.
+  
+ USAGE :
+ 	1. Replace Existing HTTP Request Sampler
+		Replace the currently used HTTP Request Sampler in the JMeter script with the provided JSR223 Sampler (this one).
+		This JSR223 Sampler will fully handle request construction, payload submission, and response capture.
+		
+	2. Configure Required Cookies
+		Update the variable cookieData (initialized on line #40) with all cookies required for your request.
+		Ensure that:
+		The same cookies currently being passed via the HTTP Request Sampler are added here.
+		Cookie formatting follows the standard &quot;key=value; key2=value2&quot; pattern.
+
+	3. Add or Remove HTTP Headers
+		Modify the request headers defined in the script on line #90.
+		Add any headers currently configured in the HTTP Request Sampler.
+		Remove or update any headers no longer applicable.
+		Ensure required headers (such as Content-Type, Accept, Authorization, etc.) are correctly set.
+
+	4. Configure Global Parameter: eventsToTrack
+		Provide a valid value for the global parameter eventsToTrack.
+		If no value is supplied, the default value will be 10.
+		Ensure this parameter aligns with your test scenario expectations, you can find out this value from chrome developer console refer to response body eventstream.
+
+ 	5. View Results in Standard JMeter Format
+		The sampler writes the request and response data to the SampleResult JMeter variable, ensuring:
+		You can inspect request/response payloads in View Results Tree.
+		The output appears identical to that of a standard HTTP Request Sampler.
+		This significantly improves troubleshooting analysis.
+
+ DEPENDENCIES:
+   - OkHttp 3.10.0 (HTTP client with HTTP/2 support)  Should be present natively in your JMeter installer (okhttp-3.10.0.jar) under \JMeter\lib dir
+   - okhttp-sse 3.11.0 (Server-Sent Events support)   https://repo1.maven.org/maven2/com/squareup/okhttp3/okhttp-sse/3.11.0/okhttp-sse-3.11.0.jar copy under \JMeter\lib\ext
+
+ OUTPUT VARIABLES (Available for Assertions/Extractors):
+    - ${sse_event_count}         		= Total number of events received
+    - ${partial_time_for_firstToken} 	= Time for first N events (ms) - USER PERCEIVED
+    - ${sse_total_time}          		= Total time for all events (ms)
+
+ CUSTOM RESPONSE HEADERS (Visible in View Results Tree):
+    - X-SSE-Event-Count          = Total events
+    - X-SSE-Total-Time           = Total duration (ms)
+    - X-SSE-First-N-Events-Time  = First N events duration (ms)
+
+
+ AUTHOR: Sujeet Velapure
+  DATE: January 2026
+  VERSION: 2.0
+
+*/
+
+
+
+//For automatic cookie retrieval to work ,  in jmeter.properties or user.properties property &apos; CookieManager.save.cookies&apos; shoudl be set to true e.g. CookieManager.save.cookies=true 
+// Authentication cookie (update with valid session tokens)
+def cookieData =&quot;route_token=&quot;+vars.get(&quot;COOKIE_route_token&quot;)+&quot;;saml_token_id=&quot;+vars.get(&quot;COOKIE_saml_token_id&quot;)+&quot;;_cacheId_token=&quot;+vars.get(&quot;COOKIE__cacheId_token&quot;)
+
+log.info(&quot;Cookies retrieved to: ${cookieData} &quot;); 
+// SampleResult, vars, and log are automatically available in JSR223 Sampler
+
+// SSE endpoint URL (chatbot/AI streaming endpoint)
+def url = &quot;https://${URL}/api/chatbot/application/chatbot/message-stream&quot;
+
+// Get number of events to track from JMeter variable (default: 10)
+// This represents ~N words/tokens that user sees = perceived responsiveness
+def eventsToTrack = (vars.get(&quot;eventsToTrack&quot;) ?: &quot;10&quot;).toInteger()
+
+// ============================================================================
+// STATE MANAGEMENT
+// ============================================================================
+// Synchronization: Wait for async SSE stream to complete
+def latch = new CountDownLatch(1)   // Latch with count=1, will be released in onClosed/onFailure
+
+AtomicInteger eventCount = new AtomicInteger(0)	// Event counter:  for total events received
+
+StringBuilder responseData = new StringBuilder() // Response data: Accumulates all events and metrics for JMeter display
+def connectionOpened = false  // Has onOpen() been called?
+def responseCode = 0 		// HTTP response code (e.g., 200)
+def responseMessage = &quot;&quot;		// HTTP response message (e.g., &quot;OK&quot;)
+
+// Timing variables
+long streamStartTime = 0		// Time from start When the user sent request
+long firstNEventsTime = 0	// Time from start until Nth event received (USER PERCEIVED)
+long totalEventsTime = 0		// Time from start until stream closes (total duration)
+boolean firstNEventsCaptured = false	// Flag: Have we captured first N events timing?
+
+// SampleResult is automatically available in JSR223 Sampler
+// Set sample label (appears in JMeter results)
+// SampleResult - JMeter&apos;s result object for storing metrics, response data, headers
+SampleResult.setSampleLabel(&quot;SSE Streaming Protocol Request&quot;)
+
+// HTTP CLIENT CONFIGURATION
+OkHttpClient client;
+try {
+    client = new OkHttpClient.Builder()   
+        .readTimeout(30, TimeUnit.SECONDS)  // 30 second timeout for JMeter
+        .build()
+
+    // Create POST body with JSON payload
+    def jsonPayload = &apos;&apos;&apos;{
+					    &quot;action&quot;: &quot;eMessage&quot;,
+					    &quot;chatID&quot;: &quot;${chatID}&quot;,
+					    &quot;chatbotId&quot;: &quot;${chatbotId}&quot;,
+					    &quot;queryText&quot;: &quot;${query_text}&quot;,
+					    &quot;timeZone&quot;: &quot;Asia/Calcutta&quot;
+					}&apos;&apos;&apos;
+					
+// Create request body with proper content type
+    MediaType mediaType = MediaType.parse(&quot;application/json; charset=utf-8&quot;)
+// Note: OkHttp 3.x signature is .create(MediaType, String)
+//       OkHttp 4.x signature is .create(String, MediaType)
+    RequestBody requestBody = RequestBody.create(mediaType, jsonPayload)
+// Build POST request with all headers to emulate browser behavior
+    Request request = new Request.Builder()
+        .url(url)
+        .post(requestBody)
+        .header(&quot;Accept&quot;, &quot;application/json, text/plain, */*&quot;)
+        .header(&quot;Accept-Encoding&quot;, &quot;gzip, deflate, br, zstd&quot;)
+        .header(&quot;Accept-Language&quot;, &quot;en-US,en;q=0.9&quot;)
+        .header(&quot;Cache-Control&quot;, &quot;no-cache&quot;)
+        .header(&quot;Connection&quot;, &quot;keep-alive&quot;)
+        .header(&quot;Content-Type&quot;, &quot;application/json&quot;)
+        .header(&quot;Cookie&quot;, cookieData)
+        .header(&quot;Host&quot;, &quot;${URL}&quot;)
+        .header(&quot;Origin&quot;, &quot;https://${URL}&quot;)
+        .header(&quot;Pragma&quot;, &quot;no-cache&quot;)
+        .header(&quot;Referer&quot;, &quot;https://${URL}/chatbot/index.html&quot;)
+        .header(&quot;User-Agent&quot;, &quot;Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36&quot;)
+        .header(&quot;X-Requested-By&quot;, &quot;XMLHttpRequest&quot;)
+        .build()
+
+// Save request details for View Results Tree display
+    SampleResult.setSamplerData(&quot;POST: ${url}\n\nRequest Payload:\n${jsonPayload}\n\nCookie: ${cookieData}&quot;)
+    SampleResult.setRequestHeaders(request.headers().toString())
+
+// EventSource.Factory creates SSE connections using OkHttp client
+    EventSource.Factory factory = EventSources.createFactory(client)
+
+    log.info(&quot;Connecting to: ${url}&quot;)
+
+// ========================================================================
+// EVENT SOURCE LISTENER - Core SSE Event Handler
+// ========================================================================
+// Implements callbacks for SSE lifecycle: onOpen, onEvent, onClosed, onFailure
+// These callbacks run asynchronously as events arrive from the server
+    EventSourceListener listener = new EventSourceListener() {
+
+    	  // ====================================================================
+        // CALLBACK 1: onOpen - Connection Established
+        // ====================================================================
+        // Called when: HTTP connection successful, headers received, stream ready
+        // Timing: Occurs after DNS + TCP + TLS handshake
+        @Override
+        void onOpen(EventSource eventSource, Response response) {
+            connectionOpened = true		// Mark connection as successful
+            responseCode = response.code()
+            responseMessage = response.message()
+            
+           // Capture all response headers from server
+           // These headers will be added to SampleResult to make it visible in JMeter&apos;s View Results Tree
+            StringBuilder headersString = new StringBuilder()
+            response.headers().names().each { name -&gt;
+                response.headers(name).each { value -&gt;
+                    headersString.append(&quot;${name}: ${value}\n&quot;)
+                }
+            }
+            SampleResult.setResponseHeaders(headersString.toString()) 
+            // Build response data section showing connection info
+            responseData.append(&quot;=== Connection Opened ===\n&quot;)
+            responseData.append(&quot;Response Code: ${response.code()}\n&quot;)
+            responseData.append(&quot;Response protocol: ${response.protocol()}\n&quot;)
+            responseData.append(&quot;Response Message: ${response.message()}\n&quot;)
+            responseData.append(&quot;Content-Type: ${response.header(&apos;Content-Type&apos;)}\n&quot;)
+            responseData.append(&quot;=== Started Receiving Streaming Response ===\n&quot;)
+            
+            log.info(&quot;Connection opened: ${response.code()}&quot;)
+        }
+
+   	   // ====================================================================
+        // CALLBACK 2: onEvent - Each SSE Event Arrives
+        // ====================================================================
+        // Called when: Server sends an event (typically few 100 tokens/words)
+        // Parameters:
+        //   - id: Event ID (optional, often null)
+        //   - type: Event type (default: &quot;message&quot;)
+        //   - data: Event payload (JSON or text)
+        @Override
+        void onEvent(EventSource eventSource, String id, String type, String data) {
+            int currentCount = eventCount.incrementAndGet()
+            def eventType = type ?: &quot;message&quot;
+
+            
+            // ----------------------------------------------------------------
+            // TIMING CAPTURE: First N Events (USER-PERCEIVED PERFORMANCE)
+            // ----------------------------------------------------------------
+            // When Nth event arrives, user has seen ~N words - perceived as responsive
+            // This is MORE IMPORTANT than total time for SLA measurement
+            if (currentCount == eventsToTrack &amp;&amp; !firstNEventsCaptured ) {
+                firstNEventsTime = System.currentTimeMillis() - streamStartTime
+                firstNEventsCaptured = true
+                log.info(&quot;First ${eventsToTrack} events received in: ${firstNEventsTime} ms&quot;)  
+              //  log.info(&quot;Event #${currentCount} \nreceived: ${data}&quot;)
+                
+            }
+            
+            
+            responseData.append(&quot;\n--- Event #${currentCount} ---\n&quot;)
+            responseData.append(&quot;Type: ${eventType}   Length: ${data.length()} characters\n&quot;)
+            responseData.append(&quot;Data: &quot; + data)  // APPEND EVENT TO RESPONSE DATA 
+            
+            log.info(&quot;Event #${currentCount} received: ${data.length()} chars&quot;)
+        }
+
+	   // ====================================================================
+        // CALLBACK 3: onClosed - Stream Completed Successfully
+        // ====================================================================
+        // Called when: Server gracefully closes the SSE stream (all events sent)
+        // This is the NORMAL completion path - all data received
+        @Override
+        void onClosed(EventSource eventSource) {
+            totalEventsTime = System.currentTimeMillis() - streamStartTime
+
+            // BUILD FINAL RESPONSE DATA - Summary Section
+            responseData.append(&quot;\n=== Streaming data finished , Connection Closed ===\n&quot;)
+          
+            responseData.append(&quot;Total time for all ${eventCount.get()} events: ${totalEventsTime} ms\n&quot;)
+            
+            log.info(&quot;Connection closed. Events: ${eventCount.get()}, Total time: ${totalEventsTime}ms&quot;)
+            // Release the latch - allows main thread to continue and finish the sampler
+            latch.countDown()
+        }
+
+	   // ====================================================================
+        // CALLBACK 4: onFailure - Error or Timeout Occurred
+        // ====================================================================
+        // Called when: Network error, timeout, server error, or manual cancel
+        // Parameters:
+        //   - t: Throwable/Exception that caused the failure
+        //   - response: Response object (may be null if connection failed)
+        @Override
+        void onFailure(EventSource eventSource, Throwable t, Response response) {
+        	// &quot;CANCEL&quot; message indicates intentional stream cancellation (not an error)
+            if (!t?.message?.contains(&quot;CANCEL&quot;)) {
+                responseData.append(&quot;\n=== Error Occurred ===\n&quot;)
+                responseData.append(&quot;Error Type: ${t?.getClass()?.name}\n&quot;)
+                responseData.append(&quot;Error Message: ${t?.message}\n&quot;)
+                // If we have a response object, capture its details
+                if (response) {
+                    responseCode = response.code()
+                    responseData.append(&quot;Response Code: ${response.code()}\n&quot;)
+                    
+                    // Capture response headers even on failure
+                    StringBuilder headersString = new StringBuilder()
+                    response.headers().names().each { name -&gt;
+                        response.headers(name).each { value -&gt;
+                            headersString.append(&quot;${name}: ${value}\n&quot;)
+                        }
+                    }
+                    SampleResult.setResponseHeaders(headersString.toString())
+                    responseData.append(&quot;\nResponse Headers:\n${headersString}\n&quot;)
+                }
+                
+                log.error(&quot;Error: ${t?.message}&quot;, t)
+            }
+            // Even on failure, calculate timing up to the failure point
+            totalEventsTime = System.currentTimeMillis() - streamStartTime
+            
+            responseData.append(&quot;\n=== Summary ===\n&quot;)
+            responseData.append(&quot;Total Events Received: ${eventCount.get()}\n&quot;)
+     	// Timing metrics (up to failure point)
+            responseData.append(&quot;\n=== Timing Metrics ===\n&quot;)
+            if (firstNEventsCaptured) {
+                responseData.append(&quot;Time for first ${eventsToTrack} events: ${firstNEventsTime} ms\n&quot;)
+            } else if (eventCount.get() &gt; 0) {
+                responseData.append(&quot;Only ${eventCount.get()} event(s) received (less than ${eventsToTrack})\n&quot;)
+            }
+            responseData.append(&quot;Total time for all ${eventCount.get()} events: ${totalEventsTime} ms\n&quot;)
+            // Release the latch - allows main thread to continue
+            latch.countDown()
+        }
+    } // End of EventSourceListener
+
+    // ========================================================================
+    // START THE SSE STREAM
+    // ========================================================================
+    // Start the stream and capture exact start time
+    streamStartTime = System.currentTimeMillis()
+    // Create EventSource connection - this initiates the HTTP POST and opens stream
+    // The listener callbacks (onOpen, onEvent, etc.) will be called asynchronously
+    EventSource eventSource = factory.newEventSource(request, listener)
+
+    // ========================================================================
+    // WAIT FOR STREAM COMPLETION
+    // ========================================================================
+    // Main thread waits here while events are processed in background
+    // Latch will be released by onClosed() or onFailure() callback
+    // Timeout: 120 seconds (adjust based on expected response times)
+    boolean completed = latch.await(120, TimeUnit.SECONDS)
+    
+    if (!completed) {
+    	// Timeout reached without onClosed/onFailure being called
+        responseData.append(&quot;\n=== Timeout Reached ===\n&quot;)
+        responseData.append(&quot;Closing connection after 120 seconds\n&quot;)
+        eventSource.cancel() // Forcefully cancel the stream
+        log.info(&quot;Timeout reached, closing connection&quot;)
+    }
+
+    // POPULATE JMETER SAMPLE RESULT - View Results Tree Display
+    // Set the response data (Text content visible in Response Data tab)
+    SampleResult.setResponseData(responseData.toString(), &quot;UTF-8&quot;)
+    
+    // Set response code and message
+    SampleResult.setResponseCode(connectionOpened ? responseCode.toString() : &quot;Timeout&quot;)
+    SampleResult.setResponseMessage(connectionOpened ? responseMessage : &quot;Connection Failed&quot;)
+
+    // ADD CUSTOM RESPONSE HEADERS (Metrics visible in Response Headers tab)
+    // These custom headers make metrics visible in JMeter&apos;s View Results Tree
+    // and can be used by extractors/post-processors
+    def existingHeaders = SampleResult.getResponseHeaders() ?: &quot;&quot;
+    StringBuilder timingHeaders = new StringBuilder(existingHeaders)
+    if (!existingHeaders.isEmpty()) {
+        timingHeaders.append(&quot;\n&quot;)
+    }
+    // Event count header
+    timingHeaders.append(&quot;X-SSE-Event-Count: ${eventCount.get()}\n&quot;)
+    // Total time header (complete streaming duration)
+    timingHeaders.append(&quot;X-SSE-Total-Time: ${totalEventsTime}\n&quot;)
+    // First N events time header (USER-PERCEIVED performance metric)
+    if (firstNEventsCaptured) {
+        timingHeaders.append(&quot;X-SSE-First-${eventsToTrack}-Events-Time: ${firstNEventsTime}\n&quot;)
+        vars.put(&quot;partial_time_for_firstToken&quot;,&quot;${firstNEventsTime}&quot;)
+    } else {
+        timingHeaders.append(&quot;X-SSE-First-${eventsToTrack}-Events-Time: N/A (only ${eventCount.get()} events received)\n&quot;)
+        vars.put(&quot;partial_time_for_firstToken&quot;,&quot;N/A&quot;)
+    }
+    SampleResult.setResponseHeaders(timingHeaders.toString())
+    
+    
+    // Set content type
+    SampleResult.setContentType(&quot;text/plain&quot;)
+    
+    // Mark as successful if we received events
+    if (eventCount.get() &gt; 0) {
+        SampleResult.setSuccessful(true)	// Mark sampler as successful
+        SampleResult.setResponseOK()		// Set response as OK
+    } else if (connectionOpened) {
+        SampleResult.setSuccessful(true)  // Connection worked but no events
+        SampleResult.setResponseMessage(&quot;Connected but no events received&quot;)
+    } else {
+        SampleResult.setSuccessful(false)  // Connection failed
+    }
+    
+} catch (Exception e) {
+    SampleResult.setResponseCode(&quot;500&quot;)
+    SampleResult.setResponseMessage(&quot;Exception: ${e.message}&quot;)
+    SampleResult.setResponseData(&quot;Error: ${e.message}\n\nStack Trace:\n${e.getStackTrace().join(&apos;\n&apos;)}&quot;, &quot;UTF-8&quot;)
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Exception in SSE request&quot;, e)
+} finally {
+  
+    // Cleanup Shutdown OkHttp&apos;s thread pools and close connections
+    client.dispatcher().executorService().shutdown()
+    client.connectionPool().evictAll()
+    log.info(&quot;Cleaning connections..&quot;)
+
+}
+
+// Store metrics in JMeter variables for assertions
+vars.put(&quot;sse_event_count&quot;, eventCount.get().toString())
+vars.put(&quot;sse_total_time&quot;, totalEventsTime.toString())
+
+</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+        </hashTree>
+        <TransactionController guiclass="TransactionControllerGui" testclass="TransactionController" testname="TC02_SSE_STREAMING_CHAT_TIME_TAKEN_FOR_FIRST_TOKEN" enabled="true">
+          <boolProp name="TransactionController.includeTimers">false</boolProp>
+          <boolProp name="TransactionController.parent">true</boolProp>
+        </TransactionController>
+        <hashTree>
+          <kg.apc.jmeter.samplers.DummySampler guiclass="kg.apc.jmeter.samplers.DummySamplerGui" testclass="kg.apc.jmeter.samplers.DummySampler" testname="Dummy Sampler to get the Response time data in Jmeter report" enabled="true">
+            <boolProp name="WAITING">true</boolProp>
+            <boolProp name="SUCCESFULL">true</boolProp>
+            <stringProp name="RESPONSE_CODE">200</stringProp>
+            <stringProp name="RESPONSE_MESSAGE">OK</stringProp>
+            <stringProp name="REQUEST_DATA">Get the partial response time for SSE request for first ${eventsToTrack} events received..</stringProp>
+            <stringProp name="RESPONSE_DATA">SSE Event Stream : first ${eventsToTrack} events received in ${partial_time} ms</stringProp>
+            <stringProp name="RESPONSE_TIME">${partial_time_for_firstToken}</stringProp>
+            <stringProp name="LATENCY">0</stringProp>
+            <stringProp name="CONNECT">0</stringProp>
+            <stringProp name="URL"></stringProp>
+            <stringProp name="RESULT_CLASS">org.apache.jmeter.samplers.SampleResult</stringProp>
+          </kg.apc.jmeter.samplers.DummySampler>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+      <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>true</fieldNames>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <sentBytes>true</sentBytes>
+            <url>true</url>
+            <threadCounts>true</threadCounts>
+            <idleTime>true</idleTime>
+            <connectTime>true</connectTime>
+          </value>
+        </objProp>
+        <stringProp name="filename"></stringProp>
+      </ResultCollector>
+      <hashTree/>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
