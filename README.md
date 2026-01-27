@@ -7,7 +7,7 @@ In today's AI-driven world, chatbots and conversational AI applications have bec
 But here's the challenge in Simulation:
 
 ### **Traditional JMeter HTTP samplers measure the WRONG metric!** ⚠️
-
+e.g.
 When you test an SSE endpoint with standard HTTP Request samplers, you get:
 - ✅ Total Response Time: 11,500ms
 - ❌ But users saw the first response in just 3500ms!
