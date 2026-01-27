@@ -38,8 +38,9 @@ User's Actual Experience:
 2.	Background thread starts → Opens SSE connection, receives events
 3.	Main thread waits → latch.await() blocks the main thread
 4.	Background thread receives data → Processes events in onEvent()
-5.	Connection closes → onClosed() or onFailure() calls latch.countDown()
-6.	Main thread resumes → Script can now exit gracefully
+5.	Background thread continues and captures time taken by 'N' events and 'total' events.
+6.	Connection closes → onClosed() or onFailure() calls latch.countDown()
+7.	Main thread resumes → Script can now exit gracefully
 
 #### Visual Flow:
 ```
@@ -58,3 +59,11 @@ latch.await [WAITING]          Receives event 2
        |                       latch.countDown() -----> Releases main thread
 Cleanup & exit
 ```
+
+#### JMeter Integration
+1. Runs as **JSR223 Sampler** in JMeter test plans
+2. Populates **SampleResult** for View Results Tree
+3. Stores metrics as **JMeter variables** for assertions and reporting
+4. Custom **Response Headers** with all timing metrics
+5. Detects HTTP/1.1 vs HTTP/2 automatically
+6. Cookie/authentication support within code
