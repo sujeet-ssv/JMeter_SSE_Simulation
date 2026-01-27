@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger
   ============================================================================
  	SSE (Server-Sent Events) Performance Testing Script for JMeter
   ============================================================================
-  
+ * 
  PURPOSE:
     Measures user-perceived performance of streaming chatbot/AI responses.
     Captures Time to First Token (TTFT) and First N Events timing - metrics   that matter to end users, not just total response time.
@@ -56,6 +56,7 @@ import java.util.concurrent.atomic.AtomicInteger
     - X-SSE-Total-Time           = Total duration (ms)
     - X-SSE-First-N-Events-Time  = First N events duration (ms)
 
+
  AUTHOR: Sujeet Velapure
   DATE: January 2026
   VERSION: 2.0
@@ -64,24 +65,24 @@ import java.util.concurrent.atomic.AtomicInteger
 
 
 
-//For automatic cookie retrieval to work ,  in jmeter.properties or user.properties property ' CookieManager.save.cookies' shoudl be set to true e.g. CookieManager.save.cookies=true 
-// Authentication cookie (update with valid session tokens)
+/*For automatic cookie retrieval to work ,  in jmeter.properties or user.properties property ' CookieManager.save.cookies' shoudl be set to true e.g. CookieManager.save.cookies=true 
+ Authentication cookie (update with valid session tokens) */
 def cookieData ="route_token="+vars.get("COOKIE_route_token")+";saml_token_id="+vars.get("COOKIE_saml_token_id")+";_cacheId_token="+vars.get("COOKIE__cacheId_token")
 
 log.info("Cookies retrieved to: ${cookieData} "); 
-// SampleResult, vars, and log are automatically available in JSR223 Sampler
+/* SampleResult, vars, and log are automatically available in JSR223 Sampler
 
-// SSE endpoint URL (chatbot/AI streaming endpoint)
+ SSE endpoint URL (chatbot/AI streaming endpoint) */
 def url = "https://${URL}/api/chatbot/application/chatbot/message-stream"
 
-// Get number of events to track from JMeter variable (default: 10)
-// This represents ~N words/tokens that user sees = perceived responsiveness
+/* Get number of events to track from JMeter variable (default: 10)
+   This represents ~N words/tokens that user sees = perceived responsiveness */
 def eventsToTrack = (vars.get("eventsToTrack") ?: "10").toInteger()
 
-// ============================================================================
-// STATE MANAGEMENT
-// ============================================================================
-// Synchronization: Wait for async SSE stream to complete
+/* ============================================================================
+	 STATE MANAGEMENT
+   ============================================================================
+ Synchronization: Wait for async SSE stream to complete */
 def latch = new CountDownLatch(1)   // Latch with count=1, will be released in onClosed/onFailure
 
 AtomicInteger eventCount = new AtomicInteger(0)	// Event counter:  for total events received
@@ -97,9 +98,9 @@ long firstNEventsTime = 0	// Time from start until Nth event received (USER PERC
 long totalEventsTime = 0		// Time from start until stream closes (total duration)
 boolean firstNEventsCaptured = false	// Flag: Have we captured first N events timing?
 
-// SampleResult is automatically available in JSR223 Sampler
-// Set sample label (appears in JMeter results)
-// SampleResult - JMeter's result object for storing metrics, response data, headers
+/* SampleResult is automatically available in JSR223 Sampler
+   Set sample label (appears in JMeter results)
+   SampleResult - JMeter's result object for storing metrics, response data, headers */
 SampleResult.setSampleLabel("SSE Streaming Protocol Request")
 
 // HTTP CLIENT CONFIGURATION
@@ -151,26 +152,26 @@ try {
 
     log.info("Connecting to: ${url}")
 
-// ========================================================================
-// EVENT SOURCE LISTENER - Core SSE Event Handler
-// ========================================================================
-// Implements callbacks for SSE lifecycle: onOpen, onEvent, onClosed, onFailure
-// These callbacks run asynchronously as events arrive from the server
+/* ========================================================================
+	 EVENT SOURCE LISTENER - Core SSE Event Handler
+   ========================================================================
+ 	Implements callbacks for SSE lifecycle: onOpen, onEvent, onClosed, onFailure
+ 	These callbacks run asynchronously as events arrive from the server */
     EventSourceListener listener = new EventSourceListener() {
 
-    	  // ====================================================================
-        // CALLBACK 1: onOpen - Connection Established
-        // ====================================================================
-        // Called when: HTTP connection successful, headers received, stream ready
-        // Timing: Occurs after DNS + TCP + TLS handshake
+    	  /* ====================================================================
+        	 CALLBACK 1: onOpen - Connection Established
+        	====================================================================
+        	 Called when: HTTP connection successful, headers received, stream ready
+        	 Timing: Occurs after DNS + TCP + TLS handshake */
         @Override
         void onOpen(EventSource eventSource, Response response) {
             connectionOpened = true		// Mark connection as successful
             responseCode = response.code()
             responseMessage = response.message()
             
-           // Capture all response headers from server
-           // These headers will be added to SampleResult to make it visible in JMeter's View Results Tree
+           /* Capture all response headers from server
+              These headers will be added to SampleResult to make it visible in JMeter's View Results Tree */
             StringBuilder headersString = new StringBuilder()
             response.headers().names().each { name ->
                 response.headers(name).each { value ->
@@ -189,31 +190,30 @@ try {
             log.info("Connection opened: ${response.code()}")
         }
 
-   	   // ====================================================================
-        // CALLBACK 2: onEvent - Each SSE Event Arrives
-        // ====================================================================
-        // Called when: Server sends an event (typically few 100 tokens/words)
-        // Parameters:
-        //   - id: Event ID (optional, often null)
-        //   - type: Event type (default: "message")
-        //   - data: Event payload (JSON or text)
+   	   /* ====================================================================
+        	 CALLBACK 2: onEvent - Each SSE Event Arrives
+        	 ====================================================================
+        	 Called when: Server sends an event (typically few 100 tokens/words)
+        	 Parameters:
+        	   - id: Event ID (optional, often null)
+        	   - type: Event type (default: "message")
+        	   - data: Event payload (JSON or text)  */
         @Override
         void onEvent(EventSource eventSource, String id, String type, String data) {
             int currentCount = eventCount.incrementAndGet()
             def eventType = type ?: "message"
 
             
-            // ----------------------------------------------------------------
-            // TIMING CAPTURE: First N Events (USER-PERCEIVED PERFORMANCE)
-            // ----------------------------------------------------------------
-            // When Nth event arrives, user has seen ~N words - perceived as responsive
-            // This is MORE IMPORTANT than total time for SLA measurement
+            /* ----------------------------------------------------------------
+            	 TIMING CAPTURE: First N Events (USER-PERCEIVED PERFORMANCE)
+            	----------------------------------------------------------------
+            	 When Nth event arrives, user has seen ~N words - perceived as responsive
+            	 This is MORE IMPORTANT than total time for SLA measurement */
             if (currentCount == eventsToTrack && !firstNEventsCaptured ) {
                 firstNEventsTime = System.currentTimeMillis() - streamStartTime
                 firstNEventsCaptured = true
                 log.info("First ${eventsToTrack} events received in: ${firstNEventsTime} ms")  
-              //  log.info("Event #${currentCount} \nreceived: ${data}")
-                
+  
             }
             
             
@@ -224,11 +224,11 @@ try {
             log.info("Event #${currentCount} received: ${data.length()} chars")
         }
 
-	      // ====================================================================
-        // CALLBACK 3: onClosed - Stream Completed Successfully
-        // ====================================================================
-        // Called when: Server gracefully closes the SSE stream (all events sent)
-        // This is the NORMAL completion path - all data received
+	   /* ====================================================================
+        	 CALLBACK 3: onClosed - Stream Completed Successfully
+        	 ====================================================================
+        	 Called when: Server gracefully closes the SSE stream (all events sent)
+        	 This is the NORMAL completion path - all data received */
         @Override
         void onClosed(EventSource eventSource) {
             totalEventsTime = System.currentTimeMillis() - streamStartTime
@@ -243,13 +243,13 @@ try {
             latch.countDown()
         }
 
-	      // ====================================================================
-        // CALLBACK 4: onFailure - Error or Timeout Occurred
-        // ====================================================================
-        // Called when: Network error, timeout, server error, or manual cancel
-        // Parameters:
-        //   - t: Throwable/Exception that caused the failure
-        //   - response: Response object (may be null if connection failed)
+	   /* ====================================================================
+        	 CALLBACK 4: onFailure - Error or Timeout Occurred
+        	 ====================================================================
+        	 Called when: Network error, timeout, server error, or manual cancel
+        	 Parameters:
+        	   - t: Throwable/Exception that caused the failure
+        	   - response: Response object (may be null if connection failed) */
         @Override
         void onFailure(EventSource eventSource, Throwable t, Response response) {
         	// "CANCEL" message indicates intentional stream cancellation (not an error)
@@ -293,21 +293,21 @@ try {
         }
     } // End of EventSourceListener
 
-    // ========================================================================
-    // START THE SSE STREAM
-    // ========================================================================
-    // Start the stream and capture exact start time
+    /* ========================================================================
+    	  START THE SSE STREAM
+    	  ========================================================================
+    	  Start the stream and capture exact start time */
     streamStartTime = System.currentTimeMillis()
     // Create EventSource connection - this initiates the HTTP POST and opens stream
     // The listener callbacks (onOpen, onEvent, etc.) will be called asynchronously
     EventSource eventSource = factory.newEventSource(request, listener)
 
-    // ========================================================================
-    // WAIT FOR STREAM COMPLETION
-    // ========================================================================
-    // Main thread waits here while events are processed in background
-    // Latch will be released by onClosed() or onFailure() callback
-    // Timeout: 120 seconds (adjust based on expected response times)
+    /* ========================================================================
+    	  WAIT FOR STREAM COMPLETION
+    	  ========================================================================
+    	  Main thread waits here while events are processed in background
+    	  Latch will be released by onClosed() or onFailure() callback
+    	  Timeout: 120 seconds (adjust based on expected response times) */
     boolean completed = latch.await(120, TimeUnit.SECONDS)
     
     if (!completed) {
@@ -318,17 +318,17 @@ try {
         log.info("Timeout reached, closing connection")
     }
 
-    // POPULATE JMETER SAMPLE RESULT - View Results Tree Display
-    // Set the response data (Text content visible in Response Data tab)
+    /*POPULATE JMETER SAMPLE RESULT - View Results Tree Display
+      Set the response data (Text content visible in Response Data tab) */
     SampleResult.setResponseData(responseData.toString(), "UTF-8")
     
     // Set response code and message
     SampleResult.setResponseCode(connectionOpened ? responseCode.toString() : "Timeout")
     SampleResult.setResponseMessage(connectionOpened ? responseMessage : "Connection Failed")
 
-    // ADD CUSTOM RESPONSE HEADERS (Metrics visible in Response Headers tab)
-    // These custom headers make metrics visible in JMeter's View Results Tree
-    // and can be used by extractors/post-processors
+    /* ADD CUSTOM RESPONSE HEADERS (Metrics visible in Response Headers tab)
+       These custom headers make metrics visible in JMeter's View Results Tree
+       and can be used by extractors/post-processors */
     def existingHeaders = SampleResult.getResponseHeaders() ?: ""
     StringBuilder timingHeaders = new StringBuilder(existingHeaders)
     if (!existingHeaders.isEmpty()) {
