@@ -51,8 +51,13 @@ Time to First Response (TTFR) (a.k.a. Time to First Token)
 **This metric answers one critical question: ** How long does the user wait before they feel the system has responded?
 
 ### ✅The Solution: Programmatic SSE Simulation (Groovy code) using JSR223 Sampler in JMeter
-#### How It Works in Your Script:
-1. Initiates an SSE request to the chat backend and start a timer
+
+
+#### Architecture diagram (Mermaid)
+👉 See Rendered version here: https://github.com/sujeet-ssv/JMeter_SSE_Simulation/blob/main/mermaid_graph.md
+
+#### How It Works within JMeter Script:
+1.  Initiates an SSE request to the chat backend and start a timer
 2.	In JSR223 Sampler,Background thread starts → Creates CountDownLatch(1)
 3.	Background thread starts → Opens SSE connection, start receiving events
 4.	Main thread waits → latch.await() blocks the main thread
