@@ -1,4 +1,4 @@
-# JMeter SSE Simulation - 🚀 Measuring What Users Actually Feel: 
+# JMeter SSE Simulation - 🚀 Measuring What Users Actually Feel
 JMeter Support for Server-Sent Events (SSE) - Rethinking Performance simulation for SSE Based Chat Application
 
 ## 🧩Problem Statement
@@ -36,10 +36,10 @@ User's Actual Experience:
 ```
 **The problem?** Traditional tools measure streaming completion, not streaming START— the metric users care about.
 
-As application architecture evolves, our performance testing philosophy must evolve with it. By aligning performance testing with human perception, we:
-•	Build better UX driven systems
-•	Make smarter architectural decisions
-•	Avoid optimizing the wrong bottlenecks
+As application architecture evolves, our performance testing philosophy must evolve with it. Evaluating streaming systems by full response time is like rating service by the length of the entire experience instead of how quickly it begins — the first touchpoint shapes user perception. By aligning performance testing with human perception, we:
+-  Build better UX driven systems
+-  Make smarter architectural decisions
+-  Avoid optimizing the wrong bottlenecks
 
 ### 💡What Really Needs to be Measured:
 For chat applications and AI assistants, the most important metric is:
