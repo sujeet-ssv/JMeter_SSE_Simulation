@@ -1,4 +1,4 @@
-# JMeter_SSE_Simulation - 🚀 Measuring What Users Actually Experience: 
+# JMeter SSE Simulation - 🚀 Measuring What Users Actually Experience: 
 JMeter Support for Server-Sent Events (SSE) Simulation for Modern Chat Applications
 
 ## Problem Statement
@@ -31,6 +31,14 @@ User's Actual Experience:
 └─ Complete answer: 11,500ms (User already reading)
 ```
 **The problem?** Traditional tools measure streaming completion, not streaming START—the metric users care about.
+
+### What We Really Need to Measure:
+For chat applications and AI assistants, the most important metric is:
+Time to First Response (TTFR)
+(a.k.a. Time to First Token / Time to First Chunk)
+
+**This metric answers one critical question: ** How long does the user wait before they feel the system has responded?
+
 
 ### The Solution: Custom SSE Simulation (Groovy code) using JSR223 Sampler in JMeter
 #### How It Works in Your Script:
