@@ -88,6 +88,14 @@ Time to First Response (TTFR) (a.k.a. Time to First Token)
 6. Cookie/authentication support within code
 7. Transaction Controller with a dummy sampler has been intentionally included to simulate the response time for ‘N’ events. This is done purely for reporting purposes. Refer jmx jmeter script.
 
+#### Dependency
+ 
+| Dependency                | Description / Action                                                                                                                   | Download Link |
+|---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|---------------|
+| **okhttp-sse-3.11.0.jar** | Copy this JAR into **`jmeter\lib\ext`**.                                                                                                | https://repo1.maven.org/maven2/com/squareup/okhttp3/okhttp-sse/3.11.0/okhttp-sse-3.11.0.jar |
+| **okhttp-3.10.0.jar**     | Check if this JAR already exists in **`jmeter\lib`**. If not found, download it from the link.                                          | https://repo1.maven.org/maven2/com/squareup/okhttp3/okhttp/3.10.0/okhttp-3.10.0.jar |
+
+
 ### 💬 Closing Thoughts
 This small shift — from **“request completed” to “response started”** — made our performance analysis far more accurate and meaningful.
 
