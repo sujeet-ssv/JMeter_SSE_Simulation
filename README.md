@@ -6,6 +6,9 @@ Modern chat applications no longer follow traditional request‑response pattern
 
 Technologies like Server‑Sent Events (SSE) enable this instant, streaming interaction, powering the smooth “typing effect” we’ve all come to expect from systems like ChatGPT, customer support bots, and enterprise AI assistants.
 
+**More on SSE Protocol-**
+Server-Sent Events (SSE) is a lightweight, unidirectional HTTP-based protocol for streaming real-time data from server to client, ideal for live updates like notifications, dashboards, or stock tickers. It uses a persistent connection with text/event-stream and automatic reconnection.
+
 But here's the challenge :
 
 **Traditional JMeter HTTP samplers measure the WRONG metric!** ⚠️
