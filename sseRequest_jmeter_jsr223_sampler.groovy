@@ -107,6 +107,7 @@ SampleResult.setSampleLabel("SSE Streaming Protocol Request")
 OkHttpClient client;
 try {
     client = new OkHttpClient.Builder()   
+  //    .protocols(Arrays.asList(Protocol.HTTP_2, Protocol.HTTP_1_1))          this is not required , protocol selection will be automatic
         .readTimeout(30, TimeUnit.SECONDS)  // 30 second timeout for JMeter
         .build()
 
